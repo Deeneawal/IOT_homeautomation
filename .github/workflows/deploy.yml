@@ -16,9 +16,14 @@ jobs:
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh/
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan 10.0.0.53 >> ~/.ssh/known_hosts
+        - name: Add known hosts
+          run: |
+            mkdir -p ~/.ssh
+            echo '10.0.0.53 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDhEflHCIhqWnZju4hJaJWxj1DLBGOBjQSmqDGD4zSUHoS7d48ZCDcx7jV+/CSW3DY2ei+PkYWVbmapiqwzYxvr65Lu5s3eZSS/kW+F+wbN7zNE4ckRk3yPhU2W5GVcnf8/WjzYrvITWDlpE2QvLZagPNsZPUvCZDxQNdTMACy6WDI4S0s4RmAhNMSPa++x36GR2bmzDIg0n10oM7BBldPSFg9mEPpX5iwF9sWfkni1KKfOgbVG+mqehyhUAKwk6zNugfHJ9VFX+edDfPkhFHjviEczWZ0G+wB3v6Qfs6M+p9coHENSvX6enOv0KzW8u+xNo/X8hBE5Z+4ZD8Whr0wiLhmbqcmUiLpIFvBBLkMhXBVpFFMgc9uMjJirc3E3HOgwBAbq2Nt3rQBuph10uPJnaXtZaTgPid2kpU4e9ZXBtwEJtm1VS/CJDB4tIJte1AjuiJgNDUTBSf4AxwKYAlNYkkBZEUM9Ae+vv85JYQ6kuiD5BlI3xgWfVogjNPxjKdE=' >> ~/.ssh/known_hosts
+            echo '10.0.0.53 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBO/r1erKOMbZJbBWbvKeNUQoi8BdHTpUr4dfhGX+2iP8NVpMh0orhOt+6G0EbqfWCSqWGAZVmDuvJ26jTIiL4Eg=' >> ~/.ssh/known_hosts
+            echo '10.0.0.53 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE5r5nHwaeiuXVTc1MasnR/6G/zlPQ8Svc5Rh3zvRjh2' >> ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/known_hosts
+
 
     - name: Install Node.js
       run: |
