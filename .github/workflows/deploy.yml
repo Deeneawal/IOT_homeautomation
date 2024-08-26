@@ -20,7 +20,6 @@ jobs:
         echo '10.0.0.53 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBO/r1erKOMbZJbBWbvKeNUQoi8BdHTpUr4dfhGX+2iP8NVpMh0orhOt+6G0EbqfWCSqWGAZVmDuvJ26jTIiL4Eg=' >> ~/.ssh/known_hosts
         echo '10.0.0.53 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE5r5nHwaeiuXVTc1MasnR/6G/zlPQ8Svc5Rh3zvRjh2' >> ~/.ssh/known_hosts
         chmod 600 ~/.ssh/known_hosts
-      shell: /usr/bin/bash
 
     - name: Install Node.js
       run: |
