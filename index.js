@@ -11,6 +11,8 @@ const io = socketIo(server);
 // MQTT setup
 const mqttClient = mqtt.connect('mqtt://localhost'); // Replace with you MQTT broker adress
 
+
+
 mqttClient.on('connect', () => { 
     console.log('Connected to MQTT broker');
     mqttClient.subscribe('hom/livingroom/temperature');
@@ -27,7 +29,7 @@ mqttClient.on('message', (topic, message) => {
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.status(200).json({message: 'God job!'});
+    res.status(200).json({message: 'God job!!'});
 })
 
 // start server
