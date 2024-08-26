@@ -29,7 +29,7 @@ mqttClient.on('message', (topic, message) => {
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.status(200).json({message: 'God job!!'});
+    res.status(200).json({message: 'God job!!!'});
 })
 
 // start server
