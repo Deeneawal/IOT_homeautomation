@@ -1,0 +1,24 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main  # Or the branch you want to deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to Raspberry Pi
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ ebenx@10.0.0.53:/home/ebenx/Developer/server
+          ssh -o StrictHostKeyChecking=no ebenx@10.0.0.53 "cd /home/ebenx/Developer/server && npm install --production && pm2 restart all"
