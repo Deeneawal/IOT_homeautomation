@@ -1,43 +1,38 @@
-const mqtt = require('mqtt');
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
-
-// setup express app
+const mqtt = require('mqtt');
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const port = 3000;
+
+// Middleware to parse JSON data
+app.use(express.json());
 
 // MQTT setup
-const mqttClient = mqtt.connect('mqtt://localhost'); // Replace with you MQTT broker adress
+const mqttClient = mqtt.connect('mqtt://localhost'); // Use your MQTT broker address
 
-
-
-mqttClient.on('connect', () => { 
+mqttClient.on('connect', () => {
     console.log('Connected to MQTT broker');
-    mqttClient.subscribe('hom/livingroom/temperature');
+    mqttClient.subscribe('home/livingroom/temperature'); // Subscribe to the temperature topic
 });
 
 mqttClient.on('message', (topic, message) => {
-    if (topic == 'home/livingroom/temperature'){
+    if (topic === 'home/livingroom/temperature') {
         const temperature = message.toString();
-        io.emit('temperature', {value: temperature});
+        console.log(`Received temperature: ${temperature}`);
+        // Optionally, you could handle the received temperature here, e.g., store it in a database
     }
 });
 
-// Serve static files
-app.use(express.static('public'));
-
+// Endpoint to handle incoming data from ESP32
 app.get('/', (req, res) => {
-    res.status(200).json({message: 'God job!!!'});
-})
+    console.log("hello, world");
+    res.status(200).send('Data received');
+});
 
-// start server
-server.listen(3000, () => {
-    console.log('Server is running of port 3000');
-})
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
 
-
-
-
-
+// about to add socketId
+// again
