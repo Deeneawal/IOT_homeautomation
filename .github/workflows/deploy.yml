@@ -1,0 +1,39 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main  # Change this to your desired branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan 10.0.0.53 >> ~/.ssh/known_hosts
+
+    - name: Install Node.js
+      run: |
+        ssh ebenx@10.0.0.53 "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+        ssh ebenx@10.0.0.53 "sudo apt-get install -y nodejs"
+        
+    - name: Deploy to Raspberry Pi
+      run: |
+        ssh ebenx@10.0.0.53 'mkdir -p /home/ebenx/Developer/server/'
+        scp -r * ebenx@10.0.0.53:/home/ebenx/Developer/server
+
+    - name: Install Dependencies
+      run: |
+        ssh ebenx@10.0.0.53 "cd /home/ebenx/Developer/server && npm install"
+
+    - name: Start Application
+      run: |
+        ssh ebenx@10.0.0.53 "pm2 restart all || pm2 start /home/ebenx/Developer/server/app.js --name 'your-app-name'"
