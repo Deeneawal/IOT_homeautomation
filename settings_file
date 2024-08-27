@@ -1,0 +1,33 @@
+
+
+MQTT
+Setting up mqtt on broker /server
+
+	# Install mosquito
+	sudo apt-get update
+	sudo apt-get install mosquitto mosquitto-clients
+
+	#Edit the configuration File
+	sudo vim /etc/mosquitto/mosquitto.conf
+
+	Add the following:
+	# Listen on all network interfaces (0.0.0.0) on port 1883
+	listener 1883 0.0.0.0
+	allow_anonymous true
+
+	# restart
+	sudo systemctl restart mosquitto
+	
+	# enable mosquitto to start on boot
+	sudo systemctl enable mosquitto
+
+
+POSTGRESS
+enter as postgress user
+sudo -i -u postgres
+then: psql
+
+
+Access porstgress database
+sudo -u postgres psql
+

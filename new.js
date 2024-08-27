@@ -8,20 +8,15 @@ const port = 3000;
 app.use(express.json());
 
 // MQTT setup
-const mqttClient = mqtt.connect('mqtt://10.0.0.53:1883'); // Use your MQTT broker address
+const mqttClient = mqtt.connect('mqtt://localhost'); // Use your MQTT broker address
 
 mqttClient.on('connect', () => {
     console.log('Connected to MQTT broker');
-    mqttClient.subscribe('h/l/t', (err) => {
-	if(err){
-		console.error("failed to suscribe to topic: ", err);
-	}
-    });
-	// Subscribe to the temperature topic
+    mqttClient.subscribe('home/livingroom/temperature'); // Subscribe to the temperature topic
 });
 
 mqttClient.on('message', (topic, message) => {
-    if (topic === 'h/l/t') {
+    if (topic === 'home/livingroom/temperature') {
         const temperature = message.toString();
         console.log(`Received temperature: ${temperature}`);
         // Optionally, you could handle the received temperature here, e.g., store it in a database
@@ -39,5 +34,3 @@ app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
-// about to add socketId
-// again
