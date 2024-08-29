@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Automation Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .graph-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .graph {
+            width: 45%;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .full-width {
+            width: 90%;
+            margin-bottom: 20px;
+        }
+    </style>
+
+<style>
+
+        .panel {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .sensor-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .sensor-name {
+            margin-right: 20px;
+            width: 150px;
+            text-align: right;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+</style>
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div class="w3-container">
+
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h3><b><i class="fa fa-dashboard"></i> My Dashboard</b></h3>
+  </header>
+
+
+
+
+
+
+
+
+
+  <div class="w3-opacity">
+    <div class="w3-clear"></div>
+    <header class="w3-center w3-margin-bottom">
+
+   
+
+      
+      <p>  <i class="fa fa-desktop w3-margin-bottom w3-text-theme" style="font-size:50px"></i>
+        <i class="w3-text-theme w3-text-medium" >Device control</i>
+       
+    </p>
+    </header>
+    </div>
+
+
+  <div class="w3-row-padding w3-margin-bottom">
+    <div class="w3-quarter">
+      <div class="w3-container w3-red w3-padding-16">
+        <div class="w3-left">
+            <label class="switch">
+                <input id="temp_check" type="checkbox" class="sensor-checkbox" data-sensor="temperature">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="w3-right">
+          <h3 id="temp_raw">52</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Temperature</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-blue w3-padding-16">
+        <div class="w3-left">
+            <label class="switch">
+                <input id="pres_check" type="checkbox" class="sensor-checkbox" data-sensor="pressure">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="w3-right">
+          <h3 id="pres_raw">99</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Pressure, hPa</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-teal w3-padding-16">
+        <div class="w3-left">
+            <label class="switch">
+                <input id="air_check" type="checkbox" class="sensor-checkbox" data-sensor="air" >
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="w3-right">
+          <h3 id="air_raw">23</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Air Quality</h4>
+      </div>
+    </div>
+    <div class="w3-quarter">
+      <div class="w3-container w3-orange w3-text-white w3-padding-16">
+        <div class="w3-left">
+            <label class="switch">
+                <input id="light_check" type="checkbox" class="sensor-checkbox" data-sensor="light" >
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="w3-right">
+          <h3 id="light_raw">50</h3>
+        </div>
+        <div class="w3-clear"></div>
+        <h4>Light Intensity Control</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="w3-opacity">
+    <div class="w3-clear"></div>
+    <header class="w3-center w3-margin-bottom">
+      <h5><b>GRAPHICAL DISPLAY OF CONNECTED DEVICES</b></h5>
+    </header>
+</div>
+
+<div class="w3-container">
+    <div class="graph-container">
+        <div id="tempGraph" class="graph"></div>
+        <div id="pressureGraph" class="graph"></div>
+    </div>
+    <div class="graph-container">
+        <div id="airQualityGraph" class="graph"></div>
+        <div id="lightGraph" class="graph"></div>
+    </div>
+    <div class="graph-container">
+        <div id="gaugeGraph" class="full-width"></div>
+    </div>
+</div>
+
+
+
+<script>
+    // script for graphs
+    // Initial data setup
+    let time = new Date();
+    let temperature = [Math.random() * 30 + 10];
+    let pressure = [Math.random() * 50 + 1000];
+    let airQuality = [Math.random() * 200];
+    let lightIntensity = [Math.random() * 800 + 200];
+    let times = [time];
+
+    // Temperature - Line Chart
+    Plotly.newPlot('tempGraph', [{
+        x: times,
+        y: temperature,
+        mode: 'lines',
+        name: 'Temperature (°C)',
+        line: {color: 'red'}
+    }], {
+        title: 'Temperature (°C)',
+        xaxis: {title: 'Time'},
+        yaxis: {title: 'Value'}
+    });
+
+    // Pressure - Line Chart
+    Plotly.newPlot('pressureGraph', [{
+        x: times,
+        y: pressure,
+        mode: 'lines',
+        name: 'Pressure (hPa)',
+        line: {color: 'blue'}
+    }], {
+        title: 'Pressure (hPa)',
+        xaxis: {title: 'Time'},
+        yaxis: {title: 'Value'}
+    });
+
+    // Air Quality - Line Chart
+    Plotly.newPlot('airQualityGraph', [{
+        x: times,
+        y: airQuality,
+        mode: 'lines',
+        name: 'Air Quality (AQI)',
+        line: {color: 'green'}
+    }], {
+        title: 'Air Quality (AQI)',
+        xaxis: {title: 'Time'},
+        yaxis: {title: 'Value'}
+    });
+
+    // Light Intensity - Line Chart
+    Plotly.newPlot('lightGraph', [{
+        x: times,
+        y: lightIntensity,
+        mode: 'lines',
+        name: 'Light Intensity (Lux)',
+        line: {color: 'orange'}
+    }], {
+        title: 'Light Intensity (Lux)',
+        xaxis: {title: 'Time'},
+        yaxis: {title: 'Value'}
+    });
+
+    // Gauge Chart for Temperature
+    Plotly.newPlot('gaugeGraph', [{
+        type: "indicator",
+        mode: "gauge+number",
+        value: temperature[0],
+        title: { text: "Temperature (°C)" },
+        gauge: {
+            axis: { range: [0, 50] },
+            steps: [
+                { range: [0, 20], color: "lightblue" },
+                { range: [20, 30], color: "green" },
+                { range: [30, 50], color: "red" }
+            ],
+            threshold: {
+                line: { color: "black", width: 4 },
+                thickness: 0.75,
+                value: 30
+            }
+        }
+    }], {
+        title: 'Temperature Gauge',
+    });
+
+    // Function to update the data for all plots
+    function updatePlot(data) {
+        let currentTime = new Date();
+
+        // Simulate incoming data
+        let newTemperature = Math.random() * 30 + 10;
+        let newPressure = Math.random() * 50 + 1000;
+        let newAirQuality = Math.random() * 200;
+        let newLightIntensity = Math.random() * 800 + 200;
+
+        // Update the data arrays
+        times.push(currentTime);
+        temperature.push(data.temperature);
+        pressure.push(data.pressure);
+        airQuality.push(data.airQuality);
+        lightIntensity.push(data.lightIntensity);
+
+        // Limit the number of data points to keep the chart readable
+        const maxDataPoints = 20;
+        if (times.length > maxDataPoints) {
+            times.shift();
+            temperature.shift();
+            pressure.shift();
+            airQuality.shift();
+            lightIntensity.shift();
+        }
+
+        // Update each plot individually
+        Plotly.update('tempGraph', {
+            x: [times],
+            y: [temperature]
+        });
+
+        Plotly.update('pressureGraph', {
+            x: [times],
+            y: [pressure]
+        });
+
+        Plotly.update('airQualityGraph', {
+            x: [times],
+            y: [airQuality]
+        });
+
+        Plotly.update('lightGraph', {
+            x: [times],
+            y: [lightIntensity]
+        });
+
+        // Update the Gauge Chart
+        Plotly.update('gaugeGraph', {
+            value: newTemperature,
+        });
+    }
+
+</script>
+
+
+<script>
+
+    const socket = io();
+
+    // Object to store sensor states
+    let sensorStates = {
+        temperature: 0,
+        pressure: 0,
+        air: 0,
+        light: 0
+    };
+
+    function handleCheckboxChange(event) {
+        const sensorName = event.target.dataset.sensor;
+        const sensorState = event.target.checked ? 1 : 0;
+        sensorStates[sensorName] = sensorState;
+
+        console.log(`${sensorName} sensor state: ${sensorState}`);
+
+        socket.emit('checkBoxData', `${sensorName},${sensorState}`);
+    }
+
+    // Get all checkbox elements with a specific class or data attribute
+    const checkboxes = document.querySelectorAll('.sensor-checkbox');
+
+    // Add event listeners to each checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', handleCheckboxChange);
+    });
+
+       // Listen for sensor data from the server
+    socket.on('sensorData', (data) => {
+        setValues(data);
+        updatePlot(data);
+    });
+
+
+
+    function setValues(data) {
+      // Update the text content of the HTML elements
+        document.getElementById('temp_raw').innerText = parseFloat(data.temperature).toFixed(2);
+        document.getElementById('pres_raw').innerText =  parseFloat(data.pressure).toFixed(2);
+        document.getElementById('air_raw').innerText =  parseFloat(data.airQuality).toFixed(2);
+        document.getElementById('light_raw').innerText =  parseFloat(data.lightIntensity).toFixed(2);
+        // You can now use these values in your application logic
+    }
+
+   
+    
+
+</script>
+
+</body>
+</html>

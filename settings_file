@@ -31,3 +31,8 @@ then: psql
 Access porstgress database
 sudo -u postgres psql
 
+
+
+
+  
+  
