@@ -16,7 +16,7 @@ createSensorDataTable();
 
 const getAllSensorData = async () => {
     try {
-      const result = await pool.query('SELECT * FROM sensor_data');
+      const result = await pool.query('SELECT * FROM sensor_data limit 5');
       return result.rows;
     } catch (err) {
       throw new Error(err);
@@ -37,7 +37,7 @@ const getAllSensorData = async () => {
         const querySpecificTimeRange = `
             SELECT *
             FROM sensor_data
-            WHERE timestamp BETWEEN NOW() - INTERVAL '${time.hoursEnd} hours' AND NOW() - INTERVAL '${time.hoursStart} hours';
+            WHERE timestamp BETWEEN NOW() - INTERVAL '${time.timeEnd} hours' AND NOW() - INTERVAL '${time.timeStart} hours';
         `;
         const result = await pool.query(querySpecificTimeRange);
         return result.rows;

@@ -9,6 +9,7 @@
   "author": "Ebenezer Asabre",
   "license": "ISC",
   "dependencies": {
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
     "http": "^0.0.1-security",
     "mqtt": "^5.10.0",

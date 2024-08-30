@@ -4,10 +4,18 @@ const app = express();
 const port = 3000;
 const http = require('http');
 const server = http.createServer(app);
+const path = require('path');
 const { Server } = require("socket.io");
 const io = new Server(server);
 const routes = require('./src/routes');
 const sensorModel = require('./src/models/sensors.model');
+
+// Set EJS as the templating engine
+app.set('view engine', 'ejs');
+
+// Specify the directory where EJS files are located
+app.set('views', path.join(__dirname, 'public/')); // Replace 'templates' with your desired directory
+
 
 let sensorBuffer = [];
 
@@ -47,7 +55,7 @@ mqttClient.on('message', async (topic, message) => {
         io.emit('sensorData', sensorData);  
 
         //save sensor data(average) in database
-        // save_avg_sensor_data(sensorData);
+        save_avg_sensor_data(sensorData);
     }
 
     // listen to other suscribe topics
@@ -62,10 +70,6 @@ app.get('/', (req, res) => {
 });
 
 // serve static files
-  app.get('/app', (req, res) => {
-    console.log('connect get');
-    res.sendFile(__dirname + '/public/app.html');
-  });
 
   // endpoint for showing graphs
   app.get('/graph', (req, res) => {
@@ -73,19 +77,53 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/graph.html');
   });
 
+app.get('/detail', async (req, res) => {
+    try {
+        const data = await sensorModel.getAllSensorData();
+        res.render('detail', { data }); // Assuming you're using a template engine
+    } catch (error) {
+        res.status(500).send('Error retrieving data');
+    }
+});
+
  
 
  
-/// socket io connect
 io.on('connection', (socket) => {
-    console.log('a user connected to socketIO');
+    console.log('A user connected to Socket.IO');
 
+    // Handle checkbox data sent from the client
     socket.on('checkBoxData', (checkBoxData) => {
-        console.log('Live feedback from checkBox to mqtt: ' + checkBoxData);
-        mqttClient.publish('esp/cmd', checkBoxData);    // publish user commands from client side
+        console.log(`Live feedback from checkbox to MQTT: ${checkBoxData}`);
+
+         // Send the retrieved data back to the client
+         socket.emit('x', "mercy me");
+        
+        // Publish the checkbox data to the MQTT topic
+        mqttClient.publish('esp/cmd', checkBoxData);
     });
 
+    // Handle time range search requests from the client
+    socket.on('searchTimeRange', async (searchTime) => {
+       
+            // Query the database for sensor data within the specified time range
+            const returnData = await sensorModel.getSensorDataWithinRange(searchTime);
+            
+            // console.log("Retrieved sensor data within range: ", returnData);
+            
+            // Send the retrieved data back to the client
+            socket.emit('recRange', returnData);
+       
+    });
+
+
+
 });
+
+
+
+
+
 
 
 function convert_payload_str_to_obj(payload_str){
