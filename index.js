@@ -1,3 +1,16 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
 const express = require('express');
 const mqtt = require('mqtt');
 const app = express();
@@ -103,13 +116,11 @@ io.on('connection', (socket) => {
         mqttClient.publish('esp/cmd', checkBoxData);
     });
 
-    // Handle time range search requests from the client
+    // Handle SensorDataWithinRange requests from the client
     socket.on('searchTimeRange', async (searchTime) => {
        
             // Query the database for sensor data within the specified time range
             const returnData = await sensorModel.getSensorDataWithinRange(searchTime);
-            
-            // console.log("Retrieved sensor data within range: ", returnData);
             
             // Send the retrieved data back to the client
             socket.emit('recRange', returnData);

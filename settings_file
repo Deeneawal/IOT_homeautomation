@@ -22,14 +22,116 @@ Setting up mqtt on broker /server
 	sudo systemctl enable mosquitto
 
 
-POSTGRESS
+
+
+
+
+
+
+
+
+
+
+
+
+
+POSTGRESS with Linux
+
+Install PostgreSQL along with the postgresql-contrib package, which provides additional utilities and features:
+sudo apt-get install postgresql postgresql-contrib
+
+Start the PostgreSQL service:
+sudo systemctl start postgresql
+
+Enable PostgreSQL to start automatically on boot:
+sudo systemctl enable postgresql
+
+
+
+
+
 enter as postgress user
+
+Switch to the postgres user, which is the default superuser created during installation:
 sudo -i -u postgres
+
 then: psql
 
 
 Access porstgress database
 sudo -u postgres psql
+
+
+
+
+
+
+
+Postgres with HomeBrew
+
+1. Install PostgreSQL:
+brew update
+brew install postgresql
+
+
+2. Start PostgreSQL Service:
+brew services start postgresql
+
+3. Initialize the Database (If Needed):
+initdb /usr/local/var/postgres
+
+
+4. Access the PostgreSQL Shell:
+psql postgres
+
+
+To create a new database, run
+createdb yourdbname
+
+
+6. Stop the PostgreSQL Service (Optional):
+brew services stop postgresql
+
+7. Enable PostgreSQL to Start on Boot:
+Enable PostgreSQL to Start on Boot:
+pg_ctl -D /usr/local/var/postgres start
+
+
+
+
+
+mosquito with homeBrew
+
+1. Install Mosquitto:
+brew update
+brew install mosquitto
+
+
+
+2. Edit the Configuration File:
+sudo vim /usr/local/etc/mosquitto/mosquitto.conf
+
+Add the following
+listener 1883 0.0.0.0
+allow_anonymous true
+
+3. Restart Mosquitto:
+brew services restart mosquitto
+
+
+4. Enable Mosquitto to Start on Boot:
+brew services start mosquitto
+
+
+
+NPM installations
+npm install express http mqtt pg socket.io
+
+
+
+
+
+
 
 
 
