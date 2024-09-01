@@ -1,7 +1,7 @@
 
 
 MQTT
-Setting up mqtt on broker /server
+Setting up mqtt on broker /server ( LINUX )
 
 	# Install mosquito
 	sudo apt-get update
@@ -20,15 +20,6 @@ Setting up mqtt on broker /server
 	
 	# enable mosquitto to start on boot
 	sudo systemctl enable mosquitto
-
-
-
-
-
-
-
-
-
 
 
 
