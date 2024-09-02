@@ -88,7 +88,6 @@ app.get('/detail', async (req, res) => {
 
  
 
- 
 io.on('connection', (socket) => {
     console.log('A user connected to Socket.IO');
 
@@ -117,9 +116,6 @@ io.on('connection', (socket) => {
 
 
 });
-
-
-
 
 
 
