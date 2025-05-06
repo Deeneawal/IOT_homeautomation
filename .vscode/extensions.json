@@ -1,0 +1,5 @@
+{
+    "unwantedRecommendations": [
+        "espressif.esp-idf-extension"
+    ]
+}

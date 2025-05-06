@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Automation Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .w3-dropdown-content {
+            z-index: 1000 !important;
+        }
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="w3-container w3-theme w3-padding" id="myHeader">
+        <div class="w3-center">
+            <h4>MONITOR STATE OF SENSORS AT HOME</h4>
+            <h1 class="w3-xxxlarge w3-animate-bottom">HOME AUTOMATION PROJECT</h1>
+        </div>
+    </header>
+
+    <div class="w3-container">
+        <div class="w3-center">
+            <h2>Sensor Data Record</h2>
+            <p class="w3-large"><span id="selectedOption">None</span></p>
+            
+            <div class="search-container">
+                <div class="w3-dropdown-hover">
+                    <button class="w3-button w3-black">Choose time unit</button>
+                    <div class="w3-dropdown-content w3-bar-block w3-border">
+                        <label class="w3-bar-item w3-button">
+                            <input type="radio" name="option" value="minutes"> Minutes
+                        </label>
+                        <label class="w3-bar-item w3-button">
+                            <input type="radio" name="option" value="hours"> Hours
+                        </label>
+                        <label class="w3-bar-item w3-button">
+                            <input type="radio" name="option" value="days"> Days
+                        </label>
+                    </div>
+                </div>
+                
+                <input id="search" type="text" placeholder="Enter range (e.g., 1,5)" 
+                       class="w3-round-xxlarge w3-white w3-text-dark w3-border-0 w3-large w3-padding">
+                <button class="w3-btn w3-black w3-round-large" onclick="searchData()">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="w3-responsive w3-card-4">
+            <table class="w3-table w3-striped w3-bordered">
+                <thead>
+                    <tr class="w3-teal">
+                        <th>Time</th>
+                        <th>Temperature (°C)</th>
+                        <th>Humidity (%)</th>
+                        <th>Air Quality (ppm)</th>
+                        <th>Light (lux)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        
+        // Real-time data update handler
+        socket.on('sensorData', (data) => {
+            updateDashboard(data);
+        });
+
+        // Historical data handler
+        socket.on('recRange', (historicalData) => {
+            updateTable(historicalData);
+        });
+
+        function searchData() {
+            const input = document.getElementById('search').value.trim();
+            const timeUnit = document.querySelector('input[name="option"]:checked')?.value || 'hours';
+            
+            if (!/^\d+,\d+$/.test(input)) {
+                alert('Please enter valid numbers in "start,end" format');
+                return;
+            }
+
+            const [timeStart, timeEnd] = input.split(',').map(Number);
+            socket.emit('searchTimeRange', { timeUnit, timeStart, timeEnd });
+        }
+
+        function updateTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(item => `
+                <tr class="w3-white">
+                    <td>${new Date(item.timestamp).toLocaleString()}</td>
+                    <td>${item.temperature?.toFixed(2) || 'N/A'}</td>
+                    <td>${item.humidity?.toFixed(2) || 'N/A'}</td>
+                    <td>${item.air_quality?.toFixed(2) || 'N/A'}</td>
+                    <td>${item.light_intensity?.toFixed(2) || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initial load of recent data
+        socket.emit('getInitialData');
+    </script>
+</body>
+</html>

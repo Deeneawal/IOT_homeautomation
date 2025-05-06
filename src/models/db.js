@@ -8,7 +8,11 @@ const pool = new Pool({
     password: dbConfig.password,
     port: dbConfig.port
 });
-
+// After creating the pool in db.js
+pool.query('SELECT NOW()', (err) => {
+    if (err) console.error("Database connection failed:", err);
+    else console.log("Database connected successfully");
+  });
 pool.on('connect', () => {
     console.log('Connected to the PostgreSQL database');
 });

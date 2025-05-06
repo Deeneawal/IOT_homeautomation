@@ -25,7 +25,6 @@
     </style>
 
 <style>
-
         .panel {
             margin-top: 20px;
             display: grid;
@@ -98,19 +97,12 @@
         .slider.round:before {
             border-radius: 50%;
         }
-
 </style>
 
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
-
-<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-
-
-
 
 <!-- Header -->
 <header class="w3-container w3-theme w3-padding" id="myHeader">
@@ -119,31 +111,19 @@
     <h4>MONITOR STATE OF SENSORS AT HOME</h4>
     <h1 class="w3-xxxlarge w3-animate-bottom">IoT HOME AUTOMATION PROJECT</h1>
       <div class="w3-padding-32">
-      
-  
       </div>
     </div>
-  </header>
-  
+</header>
 
 <div class="w3-container">
-
-  <!-- Header -->
-
   <div class="w3-opacity">
     <div class="w3-clear"></div>
     <header class="w3-center w3-margin-bottom">
-
-   
-
-      
-      <p>  <i class="fa fa-dashboard w3-margin-bottom w3-text-dark" style="font-size:50px"></i>
+      <p><i class="fa fa-dashboard w3-margin-bottom w3-text-dark" style="font-size:50px"></i>
         <h3><b> My Dashboard</b></h3>
-       
-    </p>
+      </p>
     </header>
-    </div>
-
+  </div>
 
   <div class="w3-row-padding w3-margin-bottom">
     <div class="w3-quarter">
@@ -158,30 +138,29 @@
           <h3 id="temp_raw">52</h3>
         </div>
         <div class="w3-clear"></div>
-        <a href="/public/detail.ejs"><h4>Temperature</h4></a>
-      
+        <a href="/detail.ejs"><h4>Temperature</h4></a>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-blue w3-padding-16">
         <div class="w3-left">
             <label class="switch">
-                <input id="pres_check" type="checkbox" class="sensor-checkbox" data-sensor="pressure">
+                <input id="humidity_check" type="checkbox" class="sensor-checkbox" data-sensor="humidity">
                 <span class="slider round"></span>
             </label>
         </div>
         <div class="w3-right">
-          <h3 id="pres_raw">99</h3>
+          <h3 id="humidity_raw">60</h3>
         </div>
         <div class="w3-clear"></div>
-        <h4>Pressure, hPa</h4>
+        <h4>Humidity (%)</h4>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-teal w3-padding-16">
         <div class="w3-left">
             <label class="switch">
-                <input id="air_check" type="checkbox" class="sensor-checkbox" data-sensor="air" >
+                <input id="air_check" type="checkbox" class="sensor-checkbox" data-sensor="airQuality">
                 <span class="slider round"></span>
             </label>
         </div>
@@ -189,14 +168,14 @@
           <h3 id="air_raw">23</h3>
         </div>
         <div class="w3-clear"></div>
-        <h4>Air Quality</h4>
+        <h4>LPG Detection</h4>
       </div>
     </div>
     <div class="w3-quarter">
       <div class="w3-container w3-orange w3-text-white w3-padding-16">
         <div class="w3-left">
             <label class="switch">
-                <input id="light_check" type="checkbox" class="sensor-checkbox" data-sensor="light" >
+                <input id="light_check" type="checkbox" class="sensor-checkbox" data-sensor="light">
                 <span class="slider round"></span>
             </label>
         </div>
@@ -210,7 +189,6 @@
   </div>
 </div>
 
-
 <div class="w3-opacity">
     <div class="w3-clear"></div>
     <header class="w3-center w3-margin-bottom">
@@ -221,7 +199,7 @@
 <div class="w3-container">
     <div class="graph-container">
         <div id="tempGraph" class="graph"></div>
-        <div id="pressureGraph" class="graph"></div>
+        <div id="humidityGraph" class="graph"></div>
     </div>
     <div class="graph-container">
         <div id="airQualityGraph" class="graph"></div>
@@ -232,200 +210,179 @@
     </div>
 </div>
 
-
-
 <script>
-    // script for graphs
-    // Initial data setup
-    let time = new Date();
-    let temperature = [Math.random() * 30 + 10];
-    let pressure = [Math.random() * 50 + 1000];
-    let airQuality = [Math.random() * 200];
-    let lightIntensity = [Math.random() * 800 + 200];
-    let times = [time];
+    document.addEventListener('DOMContentLoaded', () => {
+        const socket = io();
+        let times = [];
+        let temperature = [];
+        let humidity = [];
+        let airQuality = [];
+        let lightIntensity = [];
 
-    // Temperature - Line Chart
-    Plotly.newPlot('tempGraph', [{
-        x: times,
-        y: temperature,
-        mode: 'lines',
-        name: 'Temperature (°C)',
-        line: {color: 'red'}
-    }], {
-        title: 'Temperature (°C)',
-        xaxis: {title: 'Time'},
-        yaxis: {title: 'Value'}
-    });
+        // Socket connection logging
+        socket.on('connect', () => console.log('Connected to server'));
+        socket.on('disconnect', () => console.log('Disconnected from server'));
 
-    // Pressure - Line Chart
-    Plotly.newPlot('pressureGraph', [{
-        x: times,
-        y: pressure,
-        mode: 'lines',
-        name: 'Pressure (hPa)',
-        line: {color: 'blue'}
-    }], {
-        title: 'Pressure (hPa)',
-        xaxis: {title: 'Time'},
-        yaxis: {title: 'Value'}
-    });
+        // Initialize empty graphs
+        initializeGraphs();
 
-    // Air Quality - Line Chart
-    Plotly.newPlot('airQualityGraph', [{
-        x: times,
-        y: airQuality,
-        mode: 'lines',
-        name: 'Air Quality (AQI)',
-        line: {color: 'green'}
-    }], {
-        title: 'Air Quality (AQI)',
-        xaxis: {title: 'Time'},
-        yaxis: {title: 'Value'}
-    });
+        // Fetch initial historical data with error handling
+        fetch('/api/sensors')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(initialData => {
+                if (!Array.isArray(initialData)) {
+                    throw new Error('Invalid data format received');
+                }
+                initialData.reverse().forEach(point => {
+                    times.push(new Date(point.timestamp));
+                    temperature.push(point.temperature);
+                    humidity.push(point.humidity);
+                    airQuality.push(point.air_quality);
+                    lightIntensity.push(point.light_intensity);
+                });
+                updateAllGraphs();
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('Failed to load initial data');
+            });
 
-    // Light Intensity - Line Chart
-    Plotly.newPlot('lightGraph', [{
-        x: times,
-        y: lightIntensity,
-        mode: 'lines',
-        name: 'Light Intensity (Lux)',
-        line: {color: 'orange'}
-    }], {
-        title: 'Light Intensity (Lux)',
-        xaxis: {title: 'Time'},
-        yaxis: {title: 'Value'}
-    });
+        // Real-time data handler
+        socket.on('sensorData', (newData) => {
+            const now = new Date();
+            times.push(now);
+            temperature.push(newData.temperature);
+            humidity.push(newData.humidity);
+            airQuality.push(newData.air_quality);
+            lightIntensity.push(newData.light_intensity);
 
-    // Gauge Chart for Temperature
-    Plotly.newPlot('gaugeGraph', [{
-        type: "indicator",
-        mode: "gauge+number",
-        value: temperature[0],
-        title: { text: "Temperature (°C)" },
-        gauge: {
-            axis: { range: [0, 50] },
-            steps: [
-                { range: [0, 20], color: "lightblue" },
-                { range: [20, 30], color: "green" },
-                { range: [30, 50], color: "red" }
-            ],
-            threshold: {
-                line: { color: "black", width: 4 },
-                thickness: 0.75,
-                value: 30
+            // Keep last 20 points
+            if(times.length > 20) {
+                times.shift();
+                temperature.shift();
+                humidity.shift();
+                airQuality.shift();
+                lightIntensity.shift();
             }
+
+            updateAllGraphs();
+            updateDisplayValues(newData);
+        });
+
+        // Checkbox control handler
+        document.querySelectorAll('.sensor-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                const sensor = event.target.dataset.sensor;
+                const state = event.target.checked ? 1 : 0;
+                socket.emit('control', { sensor, state });
+            });
+        });
+
+        function initializeGraphs() {
+            // Temperature Line Chart
+            Plotly.newPlot('tempGraph', [{
+                x: [],
+                y: [],
+                mode: 'lines',
+                name: 'Temperature (°C)',
+                line: { color: 'red' }
+            }], {
+                title: 'Temperature (°C)',
+                xaxis: { title: 'Time' },
+                yaxis: { title: 'Value' }
+            });
+
+            // Humidity Line Chart
+            Plotly.newPlot('humidityGraph', [{
+                x: [],
+                y: [],
+                mode: 'lines',
+                name: 'Humidity (%)',
+                line: { color: 'blue' }
+            }], {
+                title: 'Humidity (%)',
+                xaxis: { title: 'Time' },
+                yaxis: { title: 'Value' }
+            });
+
+            // Air Quality Line Chart
+            Plotly.newPlot('airQualityGraph', [{
+                x: [],
+                y: [],
+                mode: 'lines',
+                name: 'Air Quality (AQI)',
+                line: { color: 'green' }
+            }], {
+                title: 'Air Quality (AQI)',
+                xaxis: { title: 'Time' },
+                yaxis: { title: 'Value' }
+            });
+
+            // Light Intensity Line Chart
+            Plotly.newPlot('lightGraph', [{
+                x: [],
+                y: [],
+                mode: 'lines',
+                name: 'Light Intensity (Lux)',
+                line: { color: 'orange' }
+            }], {
+                title: 'Light Intensity (Lux)',
+                xaxis: { title: 'Time' },
+                yaxis: { title: 'Value' }
+            });
+
+            // Temperature Gauge
+            Plotly.newPlot('gaugeGraph', [{
+                type: "indicator",
+                mode: "gauge+number",
+                value: 0,
+                title: { text: "Temperature (°C)" },
+                gauge: {
+                    axis: { range: [0, 50] },
+                    steps: [
+                        { range: [0, 20], color: "lightblue" },
+                        { range: [20, 30], color: "green" },
+                        { range: [30, 50], color: "red" }
+                    ],
+                    threshold: {
+                        line: { color: "black", width: 4 },
+                        thickness: 0.75,
+                        value: 30
+                    }
+                }
+            }], { title: 'Temperature Gauge' });
         }
-    }], {
-        title: 'Temperature Gauge',
-    });
 
-    // Function to update the data for all plots
-    function updatePlot(data) {
-        let currentTime = new Date();
-
-        // Simulate incoming data
-        let newTemperature = Math.random() * 30 + 10;
-        let newPressure = Math.random() * 50 + 1000;
-        let newAirQuality = Math.random() * 200;
-        let newLightIntensity = Math.random() * 800 + 200;
-
-        // Update the data arrays
-        times.push(currentTime);
-        temperature.push(data.temperature);
-        pressure.push(data.pressure);
-        airQuality.push(data.airQuality);
-        lightIntensity.push(data.lightIntensity);
-
-        // Limit the number of data points to keep the chart readable
-        const maxDataPoints = 20;
-        if (times.length > maxDataPoints) {
-            times.shift();
-            temperature.shift();
-            pressure.shift();
-            airQuality.shift();
-            lightIntensity.shift();
+        function updateAllGraphs() {
+            // Update line charts
+            Plotly.update('tempGraph', { x: [times], y: [temperature] });
+            Plotly.update('humidityGraph', { x: [times], y: [humidity] });
+            Plotly.update('airQualityGraph', { x: [times], y: [airQuality] });
+            Plotly.update('lightGraph', { x: [times], y: [lightIntensity] });
+            
+            // Update gauge with latest temperature
+            Plotly.update('gaugeGraph', { 
+                value: temperature.length > 0 ? temperature.slice(-1)[0] : 0 
+            });
         }
 
-        // Update each plot individually
-        Plotly.update('tempGraph', {
-            x: [times],
-            y: [temperature]
-        });
+        function updateDisplayValues(data) {
+            const format = {
+                temperature: (v) => v?.toFixed(1) || '--',
+                humidity: (v) => v?.toFixed(1) || '--',
+                air_quality: (v) => v?.toFixed(0) || '--',
+                light_intensity: (v) => v?.toFixed(0) || '--'
+            };
 
-        Plotly.update('pressureGraph', {
-            x: [times],
-            y: [pressure]
-        });
-
-        Plotly.update('airQualityGraph', {
-            x: [times],
-            y: [airQuality]
-        });
-
-        Plotly.update('lightGraph', {
-            x: [times],
-            y: [lightIntensity]
-        });
-
-        // Update the Gauge Chart
-        Plotly.update('gaugeGraph', {
-            value: newTemperature,
-        });
-    }
-
-</script>
-
-
-<script>
-
-    const socket = io();
-
-    // Object to store sensor states
-    let sensorStates = {
-        temperature: 0,
-        pressure: 0,
-        air: 0,
-        light: 0
-    };
-
-    function handleCheckboxChange(event) {
-        const sensorName = event.target.dataset.sensor;
-        const sensorState = event.target.checked ? 1 : 0;
-        sensorStates[sensorName] = sensorState;
-
-        console.log(`${sensorName} sensor state: ${sensorState}`);
-
-        socket.emit('checkBoxData', `${sensorName},${sensorState}`);
-    }
-
-    // Get all checkbox elements with a specific class or data attribute
-    const checkboxes = document.querySelectorAll('.sensor-checkbox');
-
-    // Add event listeners to each checkbox
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', handleCheckboxChange);
+            document.getElementById('temp_raw').textContent = format.temperature(data.temperature);
+            document.getElementById('humidity_raw').textContent = format.humidity(data.humidity);
+            document.getElementById('air_raw').textContent = format.air_quality(data.air_quality);
+            document.getElementById('light_raw').textContent = format.light_intensity(data.light_intensity);
+        }
     });
-
-       // Listen for sensor data from the server
-    socket.on('sensorData', (data) => {
-        setValues(data);
-        updatePlot(data);
-    });
-
-
-
-    function setValues(data) {
-      // Update the text content of the HTML elements
-        document.getElementById('temp_raw').innerText = parseFloat(data.temperature).toFixed(2);
-        document.getElementById('pres_raw').innerText =  parseFloat(data.pressure).toFixed(2);
-        document.getElementById('air_raw').innerText =  parseFloat(data.airQuality).toFixed(2);
-        document.getElementById('light_raw').innerText =  parseFloat(data.lightIntensity).toFixed(2);
-        // You can now use these values in your application logic
-    }
-
-   
-    
-
 </script>
 
 </body>
