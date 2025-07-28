@@ -7,3 +7,4 @@ This project is a real-time data tracking system using an ESP32 and a Raspberry 
 - **Historical Data Queries**: Easily query past sensor data to view trends and insights.
 
 This setup enables seamless, continuous tracking with interactive visualizations for effective monitoring.
+![WhatsApp Image 2025-04-23 at 00 13 58](https://github.com/user-attachments/assets/c7107250-7c82-4f50-a969-02ffa2e2be28)
